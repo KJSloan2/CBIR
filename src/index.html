@@ -15,7 +15,7 @@
 				font-family: Arial, sans-serif;
 				text-align: left;
 				font-size: 20px;
-				z-index: 100;
+				z-index: 1;
 				display:block;
 			}
 			#info_desc {
@@ -27,7 +27,7 @@
 				font-family: Arial, sans-serif;
 				text-align: left;
 				font-size: 14px;
-				z-index: 100;
+				z-index: 1;
 				display:block;
 			}
 			#tooltip {
@@ -42,19 +42,46 @@
 				border-radius: 5px;
 				display: none;
 			}
+			#filter-controls {
+				position: fixed;
+				top: 50px;
+				right: 10px;
+				z-index: 2;
+				display: flex;
+				flex-direction: column;
+       		}
+			.filter-button {
+				margin-bottom: 2px;
+				cursor: pointer;
+				background-color: #ddd;
+				border: none;
+				color: black;
+				padding: 10px 15px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 16px;
+				border-radius: 5px;
+			}
+			.filter-button:hover {
+				background-color: #aaa;
+			}
+			.filter-button:active {
+				background-color: #555;
+				color: white;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="tooltip"></div>
 		<div id="enlarged-image" style="display: none; position: fixed; top: 125px; left: 10px; max-width: 300px; max-height: 250px;"></div>
-		<div button type="button" id="filter-controls" style="position: fixed; top: 10px; right: 10px;"></div>
+		<div id="filter-controls" ></div>
 		<script type="module" src="main.js"></script>
 		<div id="info">Image Database - Similarity Model</div>
 		<div id="info_desc">
-			This is a prototype image similarity model which will be used for content based image retrieval.<br>
+			This is a prototype image similarity model which will be used for content-based image retrieval.<br>
 			Use orbit controls with your mouse and keyboard to explore the image database.<br>
 			Hover over an image to display information about the image.
 		</div>
-	
 	</body>
 </html>
