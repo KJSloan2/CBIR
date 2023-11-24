@@ -5,6 +5,7 @@ const pointCloud = new THREE.Group();
 const labelContainer = new THREE.Group(); // Container for labels
 let scene, renderer, camera, raycaster, mouse;
 let hoveredImage;
+let currentFilterTag = null;
 
 function loadCSV(filePath) {
     fetch(filePath)
@@ -62,14 +63,17 @@ function parseCSV(csvData) {
     uniqueLocationTags.forEach(tag => {
         const filterButton = document.createElement('button');
         filterButton.textContent = tag;
-        filterButton.addEventListener('click', () => filterByLocationTag(tag));
+        filterButton.className = 'filter-button'; // Add the filter-button class
+        filterButton.addEventListener('click', function() {
+            filterByLocationTag(tag);
+        });
         filterControls.appendChild(filterButton);
     });
-    scene.add(pointCloud);
-    scene.add(labelContainer);
+        scene.add(pointCloud);
+        scene.add(labelContainer);
 }
 
-function filterByLocationTag(tag) {
+/*function filterByLocationTag(tag) {
     // Hide all points
     pointCloud.children.forEach(point => {
         point.visible = false;
@@ -81,7 +85,35 @@ function filterByLocationTag(tag) {
         .forEach(point => {
             point.visible = true;
         });
+}*/
+
+function filterByLocationTag(tag) {
+    // If the same tag is clicked again, remove the filter
+    if (tag === currentFilterTag) {
+        currentFilterTag = null;
+    } else {
+        currentFilterTag = tag;
+    }
+
+    // Hide all points
+    pointCloud.children.forEach(point => {
+        point.visible = false;
+    });
+
+    // Show points with the selected location tag or show all if no filter
+    if (currentFilterTag) {
+        pointCloud.children
+            .filter(point => point.userData.locationTag === currentFilterTag)
+            .forEach(point => {
+                point.visible = true;
+            });
+    } else {
+        pointCloud.children.forEach(point => {
+            point.visible = true;
+        });
+    }
 }
+
 function init() {
     scene = new THREE.Scene();
     const color = 0xFFFFFF;
@@ -101,7 +133,6 @@ function init() {
     const controls = new OrbitControls(camera, renderer.domElement);
     
     controls.target.set(80, 60, -11);
-    camera.position.z = 50;
     // Setup raycaster and mouse
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
@@ -145,9 +176,9 @@ function onMouseMove(event) {
         document.getElementById('tooltip').style.display = 'none';
         enlargedImageContainer.style.display = 'none';
 
-        pointCloud.children.forEach(point => {
+        /*pointCloud.children.forEach(point => {
             point.visible = true;
-        });
+        });*/
     }
     /*console.log('Current Camera Settings:');
     console.log('Position:', camera.position);
