@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+
+			#info {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+				width: 100%;
+				color: white;
+				font-family: Arial, sans-serif;
+				text-align: left;
+				font-size: 20px;
+				z-index: 100;
+				display:block;
+			}
+			#info_desc {
+				position: absolute;
+				top: 60px;
+				left: 10px;
+				width: 100%;
+				color: white;
+				font-family: Arial, sans-serif;
+				text-align: left;
+				font-size: 14px;
+				z-index: 100;
+				display:block;
+			}
+			#tooltip {
+				position: absolute;
+				top: 375px;
+				left: 10px;
+				color: white;
+				font-family: Arial, sans-serif;
+				background-color: rgba(0, 0, 0, 0.282);
+				font-size: 14px;
+				padding: 10px;
+				border-radius: 5px;
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="tooltip"></div>
+		<div id="enlarged-image" style="display: none; position: fixed; top: 125px; left: 10px; max-width: 300px; max-height: 250px;"></div>
+		<div button type="button" id="filter-controls" style="position: fixed; top: 10px; right: 10px;"></div>
+		<script type="module" src="main.js"></script>
+		<div id="info">Image Database - Similarity Model</div>
+		<div id="info_desc">
+			This is a prototype image similarity model which will be used for content based image retrieval.<br>
+			Use orbit controls with your mouse and keyboard to explore the image database.<br>
+			Hover over an image to display information about the image.
+		</div>
+	
+	</body>
+</html>
