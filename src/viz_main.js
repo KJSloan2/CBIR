@@ -6,6 +6,8 @@ const labelContainer = new THREE.Group(); // Container for labels
 let scene, renderer, camera, raycaster, mouse;
 let hoveredImage;
 let currentFilterTag = null;
+const lineObjects = [];
+const imageGrid = document.getElementById('image-grid');
 
 function loadCSV(filePath) {
     fetch(filePath)
@@ -18,7 +20,7 @@ function parseCSV(csvData) {
     const uniqueLocationTags = new Set();
     const planeGeometry = new THREE.PlaneGeometry(3, 3);
     function makeInstance(texture, x, y, z, id, color,locationTag, year, month) {
-        const planeMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+        const planeMaterial = new THREE.MeshBasicMaterial({ map: texture,transparent: true, opacity: 0.8, side: THREE.DoubleSide });
         const obj = new THREE.Mesh(planeGeometry, planeMaterial);
         obj.position.set(x, y, z);
         obj.userData.id = id;
@@ -73,20 +75,6 @@ function parseCSV(csvData) {
         scene.add(labelContainer);
 }
 
-/*function filterByLocationTag(tag) {
-    // Hide all points
-    pointCloud.children.forEach(point => {
-        point.visible = false;
-    });
-
-    // Show points with the selected location tag
-    pointCloud.children
-        .filter(point => point.userData.locationTag === tag)
-        .forEach(point => {
-            point.visible = true;
-        });
-}*/
-
 function filterByLocationTag(tag) {
     // If the same tag is clicked again, remove the filter
     if (tag === currentFilterTag) {
@@ -97,7 +85,9 @@ function filterByLocationTag(tag) {
 
     // Hide all points
     pointCloud.children.forEach(point => {
-        point.visible = false;
+        point.scale.set(0.05, 0.05, 0.05);
+        point.opacity = .25;
+        point.visible = true;
     });
 
     // Show points with the selected location tag or show all if no filter
@@ -105,10 +95,14 @@ function filterByLocationTag(tag) {
         pointCloud.children
             .filter(point => point.userData.locationTag === currentFilterTag)
             .forEach(point => {
+                point.scale.set(0.5, 0.5, 0.5);
+                point.opacity = 1;
                 point.visible = true;
             });
     } else {
         pointCloud.children.forEach(point => {
+            point.scale.set(0.5, 0.5, 0.5);
+            point.opacity = .8;
             point.visible = true;
         });
     }
@@ -141,7 +135,6 @@ function init() {
     document.addEventListener('mousemove', onMouseMove, false);
     document.addEventListener('mouseout', onMouseOut, false);
     window.addEventListener( 'resize', onWindowResize );
-
 }
 
 function onMouseMove(event) {
@@ -154,11 +147,9 @@ function onMouseMove(event) {
     const intersects = raycaster.intersectObjects(pointCloud.children, true);
     const enlargedImageContainer = document.getElementById('enlarged-image');
     if (intersects.length > 0 && intersects[0].object.userData) {
+        const hoveredPoint = intersects[0].point;
         // Get userData from the intersected object
         const { id, coords, color, locationTag, year, month } = intersects[0].object.userData;
-        const filePath = `${id}.jpg`;
-        enlargedImageContainer.innerHTML = `<img src="${filePath}" style="width: 100%; height: 100%;" />`;
-        enlargedImageContainer.style.display = 'block';
         // Show tooltip with ID, coords, and color
         const tooltip = document.getElementById('tooltip');
         tooltip.innerHTML = `
@@ -169,12 +160,46 @@ function onMouseMove(event) {
             <strong>month:</strong> [${month}]<br>
             <strong>Color:</strong> ${color.getStyle()}
         `;
-        tooltip.style.display = 'block';
+
+        const distances = pointCloud.children.map(point => {
+            const distance = point.position.distanceTo(hoveredPoint);
+            return { point, distance };
+
+        });
+        distances.sort((a, b) => a.distance - b.distance);
+        const nearestPoints = distances.slice(0, 10);
+        drawLines(hoveredPoint, nearestPoints);
+        
+
+        if (currentFilterTag != null && intersects[0].object.userData.locationTag === currentFilterTag){
+            const filePath = `${id}.jpg`;
+            enlargedImageContainer.innerHTML = `<img src="${filePath}" style="width: 100%; height: 100%;" />`;
+            enlargedImageContainer.style.display = 'block';
+            tooltip.style.display = 'block';
+
+            const distances = pointCloud.children.map(point => {
+                const distance = point.position.distanceTo(hoveredPoint);
+                return { point, distance };
+
+            });
+            distances.sort((a, b) => a.distance - b.distance);
+            const nearestPoints = distances.slice(0, 10);
+            displayImages(filePath);
+            drawLines(hoveredPoint, nearestPoints);
+
+
+        }else if (currentFilterTag === null){
+            const filePath = `${id}.jpg`;
+            enlargedImageContainer.innerHTML = `<img src="${filePath}" style="width: 100%; height: 100%;" />`;
+            enlargedImageContainer.style.display = 'block';
+            tooltip.style.display = 'block';
+        };
 
     } else {
         // Hide tooltip if no intersection or missing userData
         document.getElementById('tooltip').style.display = 'none';
         enlargedImageContainer.style.display = 'none';
+        imageGrid.innerHTML = '';
 
         /*pointCloud.children.forEach(point => {
             point.visible = true;
@@ -184,6 +209,33 @@ function onMouseMove(event) {
     console.log('Position:', camera.position);
     console.log('Rotation:', camera.rotation);
     console.log('Target:', camera.getWorldDirection(new THREE.Vector3()).add(camera.position));*/
+}
+
+function displayImages(imageUrl) {
+    // Clear previous images
+    imageGrid.innerHTML = '';
+
+    // Create an image element and add it to the grid
+    const imageElement = document.createElement('div');
+    imageElement.classList.add('grid-item');
+    imageElement.innerHTML = `<img src="${imageUrl}" alt="Nearest Point Image">`;
+    //imageGrid.appendChild(imageElement);
+}
+
+function drawLines(startPoint, targetPoints) {
+    // Remove existing line objects
+    lineObjects.forEach(line => scene.remove(line));
+    lineObjects.length = 0;
+
+    // Create lines and add them to the scene
+    targetPoints.forEach(({ point }) => {
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints([startPoint, point.position]);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+        const { id, coords, color, locationTag, year, month } = point.userData;
+        scene.add(line);
+        lineObjects.push(line);
+    });
 }
 
 
@@ -204,7 +256,7 @@ function animate() {
         //point.rotation.x += 0.01; // Rotate around X-axis
         //point.rotation.y += 0.02; // Rotate around Y-axis
     });
-    labelContainer.rotation.copy(camera.rotation); // Make labels face the camera
+    //labelContainer.rotation.copy(camera.rotation); // Make labels face the camera
     renderer.render(scene, camera);
 }
 
