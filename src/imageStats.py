@@ -62,24 +62,15 @@ for f in files_:
 					poolData_[mKey].append(v)
 			imageStats_[parse_f[0]] = {
 				"b_channel":{
-					"mean":b_mean,
-					"std":b_std,
-					"skew":b_skew,
-					"kurt":b_kurt,
+					"mean":b_mean,"std":b_std,"skew":b_skew,"kurt":b_kurt,
 					"mean_norm":None,"std_norm":None,"skew_norm":None,"kurt_norm":None
 				},
 				"g_channel":{
-					"mean":g_mean,
-					"std":g_std,
-					"skew":g_skew,
-					"kurt":g_kurt,
+					"mean":g_mean,"std":g_std,"skew":g_skew,"kurt":g_kurt,
 					"mean_norm":None,"std_norm":None,"skew_norm":None,"kurt_norm":None
 				},
 				"r_channel":{
-					"mean":r_mean,
-					"std":r_std,
-					"skew":r_skew,
-					"kurt":r_kurt,
+					"mean":r_mean,"std":r_std,"skew":r_skew,"kurt":r_kurt,
 					"mean_norm":None,"std_norm":None,"skew_norm":None,"kurt_norm":None
 				},
 				"plot":{"coords":[],"color":[]},
