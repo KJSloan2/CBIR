@@ -1,0 +1,8 @@
+{
+    "images":"path to the parent directory of images to process",
+    "content": {
+        "manifest": "path to where you want to store the manifest files",
+        "images": "path to where you want to store the shuttled images",
+        "images_grouped": "path to the parent directory where you want to store the grouped images"
+    }
+}
